@@ -11,7 +11,7 @@ One-time setup (~10 minutes). Free tier works great.
    - Your resume/CV (PDF or DOCX)
    - *(Optional)* LinkedIn profile — to include it, open your own profile on linkedin.com, click **More → Save to PDF**, then upload that PDF. (A URL or exported text also works.)
    - 2-4 recent writing samples — ideally past cover letters and reports (essays, blog posts, or emails also work), anything in your natural voice. The assistant uses these to build your voice fingerprint on first run, and matches a cover letter's formatting if you include one.
-5. Add the project instructions: open the **⋮** menu next to NotebookLM (top-right) → **Notebook settings** → **Instructions**, and paste the contents of [project-instructions.md](project-instructions.md). This is a single instruction set shared across Gemini and NotebookLM — no edits needed; your name comes from your uploaded Sources.
+5. Add the project instructions: open the **⋮** menu next to NotebookLM (top-right) → **Notebook settings** → **Instructions**, and paste the contents of [project-instructions-gemini.md](project-instructions-gemini.md) — no edits needed; your name comes from your uploaded Sources.
 6. For each new application, start a **new chat** within the notebook and paste the [kickoff message](kickoff-template.md) (or the [interview-prep message](interview-prep-template.md) to prep for a role you applied to elsewhere)
 
 [Screenshot: Notebooks sidebar with "Create Notebook" button highlighted]

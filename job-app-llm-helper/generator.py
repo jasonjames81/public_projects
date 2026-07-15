@@ -41,7 +41,13 @@ def _hard_constraints(name: str) -> str:
 4. NO AI TELLS: Do not write meta-language about being thrilled, excited to apply, writing
    to express interest, finding the role compelling, or being a perfect fit. Do not use
    triadic flourishes ("I bring rigor, empathy, and vision"). Do not write a closing line
-   that summarizes the letter you just wrote."""
+   that summarizes the letter you just wrote. Do not use negative/contrastive parallelism —
+   "it's not X, it's Y", "not just X, but Y", "X rather than Y"; state the point directly.
+   Do not pad with trailing "-ing" analysis clauses ("...positioning me to add value",
+   "...underscoring my commitment"). Avoid copulative-dodging verbs ("serves as a testament
+   to", "stands as") — just use "is/am". Avoid buzzword filler (leverage, utilize, delve,
+   robust, seamless, results-driven, proven track record, passionate) and stock openers
+   ("I hope this finds you well", "I am writing to express my interest")."""
 
 
 def _load_provider_config() -> ProviderConfig:
@@ -513,9 +519,11 @@ Here is the draft cover letter to revise:
 Your task: rewrite the cover letter to fix any of the following, while preserving substance,
 structure, and every factual claim:
 1. Phrases on the "Do NOT use" list — replace with voice-matching alternatives.
-2. Generic AI cadence — triadic flourishes, hollow superlatives, meta-statements about being thrilled or excited.
-3. Sentences that don't sound like the voice exemplars — adjust rhythm, register, and connective phrasing.
-4. Summary "buttons" — any paragraph (not just the closing) that ends on a flourish restating or elevating its point. Cut the flourish; let the concrete sentence be the last one. For the final paragraph specifically, replace a summarizing close with a characteristic closer.
+2. Negative/contrastive parallelism — "it's not X, it's Y", "not just X, but Y", "X rather than Y". This is the single most common AI tell; rewrite every instance as a direct, positive statement.
+3. Generic AI cadence — triadic flourishes, hollow superlatives, meta-statements about being thrilled or excited, copulative-dodging verbs ("serves as", "stands as" → "is"), and trailing "-ing" padding clauses ("...positioning me to...", "...underscoring my commitment").
+4. Buzzword filler and stock openers — leverage, utilize, delve, robust, seamless, results-driven, proven track record, passionate; "I hope this finds you well", "I am writing to express my interest". Replace with plain, specific language.
+5. Sentences that don't sound like the voice exemplars — adjust rhythm, register, and connective phrasing.
+6. Summary "buttons" — any paragraph (not just the closing) that ends on a flourish restating or elevating its point. Cut the flourish; let the concrete sentence be the last one. For the final paragraph specifically, replace a summarizing close with a characteristic closer.
 
 Constraints:
 - Do not invent new facts, numbers, organizations, or stories. Every concrete claim must already be in the draft.

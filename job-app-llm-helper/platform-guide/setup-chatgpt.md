@@ -11,7 +11,7 @@ One-time setup (~10 min). Free tier works.
    - Your resume/CV
    - *(Optional)* LinkedIn profile — to include it, open your own profile on linkedin.com, click **More → Save to PDF**, then upload that PDF. (A URL or exported text also works.)
    - 2-4 recent writing samples — ideally past cover letters and reports (essays, blog posts, or emails also work), anything in your natural voice. The assistant uses these to build your voice fingerprint on first run, and matches a cover letter's formatting if you include one.
-5. Under **Project instructions**, paste the contents of [project-instructions.md](project-instructions.md) — no edits needed; your name comes from your uploaded files.
+5. Under **Project instructions**, paste the contents of [project-instructions-chatgpt.md](project-instructions-chatgpt.md) — no edits needed; your name comes from your uploaded files.
 6. Start a new chat → paste the [kickoff message](kickoff-template.md) for your first application (or the [interview-prep message](interview-prep-template.md) to prep for a role you applied to elsewhere)
 
 > **First run:** The LLM will ask you to upload any missing materials and generate your voice fingerprint from your writing samples.
