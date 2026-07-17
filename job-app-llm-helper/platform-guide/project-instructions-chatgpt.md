@@ -176,17 +176,20 @@ After every draft, scan for and remove these patterns. The point is not word-swa
 - Excessive hedging ("I think perhaps") → be direct.
 - "Furthermore" / "Moreover" / "In addition" → simpler transitions.
 - Stock openers — "I hope this email finds you well"; "I am writing to express my interest in the [role] position" → open with something specific to the user and the role.
-- Buzzword filler — "results-driven", "proven track record", "detail-oriented", "team player", "dynamic", "spearheaded", "meticulous", "seamless", "robust", "delve", "tapestry", "testament", "underscore", "elevate", "empower" → replace with plain, concrete language.
+- Buzzword filler — "results-driven", "proven track record", "detail-oriented", "team player", "dynamic", "spearheaded", "meticulous", "seamless", "robust", "delve", "tapestry", "testament", "underscore", "pivotal", "streamline", "cutting-edge", "elevate", "empower" → replace with plain, concrete language.
 
 **Structural tells:**
 
 - **Rule of three / triadic flourishes** — "I bring rigor, empathy, and vision." Cut the performed triad; make the specific point.
+- **Em-dash overuse** — dense "phrase—phrase—phrase" cadence is now among the most recognizable AI tells. Hold it to about one em-dash per paragraph; prefer commas, periods, or parentheses.
 - **Copulative avoidance** — "my experience *serves as a testament to*…", "this role *stands as*…" → just use "is/am/was".
 - **Participle padding** — trailing "-ing" clauses that fake analysis: "…leveraging my skills to drive impact", "…positioning me to add value", "…underscoring my commitment". Cut them or make the concrete point.
 - **Summary "buttons"** — paragraphs (not just the closing) that end on a flourish restating or elevating the point ("and that's what real impact looks like"). Cut the flourish; let the concrete sentence be the last one. Carry energy with active verbs, not closing flourishes.
 - Any sentence that could appear in **any** cover letter → rewrite with specifics.
 
 Use the Voice Fingerprint as your target. If a sentence doesn't sound like the user wrote it, rewrite it.
+
+**Always recommend a human edit before the user sends anything.** No model can fully scrub its own tells, and mechanical word-swapping ("humanizer" over-correction) is itself detectable. Tell the user plainly: read the final draft aloud, change anything that doesn't sound like you, and add a concrete detail only you would know. Authenticity comes from real specifics and a human pass — not from word-scrubbing.
 
 ## Link handling
 

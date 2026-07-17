@@ -10,9 +10,9 @@ flows through providers/ and works with any configured CLI, API key, or local mo
 from __future__ import annotations
 
 import json
+import profile as profile_mod
 import re
 
-import profile as profile_mod
 from providers.base import ProviderError
 from providers.config import ProviderConfig
 from providers.registry import get_provider
@@ -47,7 +47,9 @@ def _hard_constraints(name: str) -> str:
    "...underscoring my commitment"). Avoid copulative-dodging verbs ("serves as a testament
    to", "stands as") — just use "is/am". Avoid buzzword filler (leverage, utilize, delve,
    robust, seamless, results-driven, proven track record, passionate) and stock openers
-   ("I hope this finds you well", "I am writing to express my interest")."""
+   ("I hope this finds you well", "I am writing to express my interest"). Use em-dashes
+   sparingly — at most about one per paragraph; the dense "phrase—phrase—phrase" cadence is
+   now a strong AI tell."""
 
 
 def _load_provider_config() -> ProviderConfig:
@@ -520,10 +522,11 @@ Your task: rewrite the cover letter to fix any of the following, while preservin
 structure, and every factual claim:
 1. Phrases on the "Do NOT use" list — replace with voice-matching alternatives.
 2. Negative/contrastive parallelism — "it's not X, it's Y", "not just X, but Y", "X rather than Y". This is the single most common AI tell; rewrite every instance as a direct, positive statement.
-3. Generic AI cadence — triadic flourishes, hollow superlatives, meta-statements about being thrilled or excited, copulative-dodging verbs ("serves as", "stands as" → "is"), and trailing "-ing" padding clauses ("...positioning me to...", "...underscoring my commitment").
-4. Buzzword filler and stock openers — leverage, utilize, delve, robust, seamless, results-driven, proven track record, passionate; "I hope this finds you well", "I am writing to express my interest". Replace with plain, specific language.
-5. Sentences that don't sound like the voice exemplars — adjust rhythm, register, and connective phrasing.
-6. Summary "buttons" — any paragraph (not just the closing) that ends on a flourish restating or elevating its point. Cut the flourish; let the concrete sentence be the last one. For the final paragraph specifically, replace a summarizing close with a characteristic closer.
+3. Em-dash overuse — reduce to at most about one per paragraph; prefer commas, periods, or parentheses. The dense "phrase—phrase—phrase" cadence is now a strong AI tell.
+4. Generic AI cadence — triadic flourishes, hollow superlatives, meta-statements about being thrilled or excited, copulative-dodging verbs ("serves as", "stands as" → "is"), and trailing "-ing" padding clauses ("...positioning me to...", "...underscoring my commitment").
+5. Buzzword filler and stock openers — leverage, utilize, delve, robust, seamless, results-driven, proven track record, passionate; "I hope this finds you well", "I am writing to express my interest". Replace with plain, specific language.
+6. Sentences that don't sound like the voice exemplars — adjust rhythm, register, and connective phrasing.
+7. Summary "buttons" — any paragraph (not just the closing) that ends on a flourish restating or elevating its point. Cut the flourish; let the concrete sentence be the last one. For the final paragraph specifically, replace a summarizing close with a characteristic closer.
 
 Constraints:
 - Do not invent new facts, numbers, organizations, or stories. Every concrete claim must already be in the draft.

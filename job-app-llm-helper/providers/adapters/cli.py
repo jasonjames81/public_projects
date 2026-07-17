@@ -72,7 +72,7 @@ class _CliProvider(Provider):
             except FileNotFoundError:
                 raise ProviderError(
                     f"{self.binary} CLI not found on PATH. Install it or pick another provider."
-                )
+                ) from None
             except subprocess.TimeoutExpired:
                 last_error = f"timed out after {self.timeout}s"
             else:

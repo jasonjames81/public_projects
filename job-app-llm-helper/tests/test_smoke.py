@@ -14,8 +14,9 @@ import pytest
 APP_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(APP_DIR))
 
-import generator  # noqa: E402
 import profile as profile_mod  # noqa: E402
+
+import generator  # noqa: E402
 from app import app  # noqa: E402
 
 SAMPLE_PROFILE = {

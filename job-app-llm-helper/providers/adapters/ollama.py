@@ -61,7 +61,7 @@ class OllamaProvider(Provider):
         except (urllib.error.URLError, OSError) as exc:
             raise ProviderError(
                 f"Ollama request failed ({exc}). Start Ollama, or `ollama pull {self.model}`."
-            )
+            ) from exc
         text = (data.get("response") or "").strip()
         if not text:
             raise ProviderError("Ollama returned an empty response.")

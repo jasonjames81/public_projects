@@ -43,6 +43,16 @@ ANTI_PATTERNS = [
     "passionate about making a difference",
     "stand out from other candidates",
     "I am confident that",
+    # 2026 buzzword spikes — see the anti-AI-tell guidance in the platform guide
+    "leverage",
+    "utilize",
+    "robust",
+    "seamless",
+    "pivotal",
+    "underscore",
+    "testament to",
+    "streamline",
+    "cutting-edge",
 ]
 
 _MIN_BACKGROUND_CHARS = 40

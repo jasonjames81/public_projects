@@ -71,11 +71,11 @@ class _ApiProvider(Provider):
         except ImportError:
             raise ProviderError(
                 f"{self.display_name} needs its SDK. Run: pip install {self.sdk_pkg}"
-            )
+            ) from None
         except Exception as exc:
             raise ProviderError(
                 f"{self.display_name} request failed: {_redact(str(exc), self.api_key)}"
-            )
+            ) from exc
 
     def _call(self, prompt: str) -> str:  # pragma: no cover - overridden
         raise NotImplementedError

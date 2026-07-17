@@ -5,7 +5,11 @@ select = ["E", "F", "W", "I", "B", "S"]
 ignore = [
     "BLE001",  # broad exception catches — intentional in route error handlers
     "S310",    # urllib audit URL — self-host only, fixed GitHub/localhost URLs
+    "S603",    # subprocess without shell — fixed argv to local tools (pandoc/pdftotext/git/xattr), never a shell string
+    "S607",    # partial executable path — intentional PATH lookup for local CLIs in a self-hosted app
+    "S104",    # bind 0.0.0.0 — self-hosted localhost app the user runs on their own machine
 ]
 
 [lint.per-file-ignores]
-"tests/*" = ["E402", "S101"]  # sys.path manipulation in test files; assert usage in pytest
+"tests/*" = ["E402", "S101", "E501"]  # sys.path manipulation; pytest asserts; long fixture strings
+"generator.py" = ["E501"]  # long lines here are LLM prompt text that must not be hard-wrapped

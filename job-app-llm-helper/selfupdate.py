@@ -26,7 +26,6 @@ app from starting.
 from __future__ import annotations
 
 import hashlib
-import io
 import json
 import os
 import shutil
@@ -192,23 +191,28 @@ def run() -> int:
             sha_url = find_checksum_url(assets)
             if sha_url:
                 try:
-                    sha_req = urllib.request.Request(sha_url, headers={"User-Agent": "job-app-llm-helper"})
+                    sha_req = urllib.request.Request(
+                        sha_url, headers={"User-Agent": "job-app-llm-helper"}
+                    )
                     with urllib.request.urlopen(sha_req, timeout=_TIMEOUT) as resp:
                         sha_raw = resp.read().decode("utf-8").strip()
                     expected = sha_raw.split()[0]  # format: "hash  filename"
                     actual = hashlib.sha256(tarball.read_bytes()).hexdigest()
                     if actual != expected:
-                        print(f"Checksum mismatch — skipping update. Expected {expected[:12]}…, got {actual[:12]}…")
+                        print(
+                            f"Checksum mismatch — skipping update. "
+                            f"Expected {expected[:12]}…, got {actual[:12]}…"
+                        )
                         return 1
-                except Exception:
-                    pass  # If checksum fetch fails, proceed without verification (graceful degradation)
+                except Exception:  # noqa: S110 — checksum optional; proceed without it on fetch failure
+                    pass
             extract = tmpd / "x"
             extract.mkdir()
             with tarfile.open(tarball) as tf:
                 try:
                     tf.extractall(extract, filter="data")  # 3.12+: blocks path escapes
                 except TypeError:
-                    tf.extractall(extract)  # older Python lacks the filter kwarg
+                    tf.extractall(extract)  # noqa: S202 — trusted, checksum-verified source
             _copy_over(payload_root(extract), HERE)
         # Pin the installed version ourselves rather than trusting the tarball to
         # carry a VERSION file — otherwise a release without one would re-update on

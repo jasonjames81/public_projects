@@ -79,7 +79,7 @@ def _pdftotext(data: bytes) -> str:
             # set permissions; a real password can't be recovered here.
             try:
                 reader.decrypt("")
-            except Exception:  # noqa: BLE001 — fall through to the clear message below
+            except Exception:  # noqa: BLE001,S110 — fall through to the clear message below
                 pass
             if reader.is_encrypted:
                 raise SourceError(
@@ -253,7 +253,7 @@ def crawl_site(url: str) -> str:
                 break
             try:
                 text = future.result()
-            except Exception:
+            except Exception:  # noqa: S112 — best-effort crawl; skip a page that fails to fetch
                 continue
             if text is None:
                 continue

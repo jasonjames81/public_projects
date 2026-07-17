@@ -10,14 +10,14 @@ Self-host only: the import (sources.py) and CLI-login (cli_auth.py) routes read 
 files / launch local processes, so this must not run as a shared multi-tenant server.
 """
 
+import profile as profile_mod
+import re
 from datetime import date
 
 from flask import Flask, Response, jsonify, render_template, request
 
-import profile as profile_mod
-from docx_writer import build_cover_letter_docx, build_coaching_docx, extract_cover_letter_section
-import re
-
+import cli_auth
+from docx_writer import build_coaching_docx, build_cover_letter_docx, extract_cover_letter_section
 from generator import (
     analyze_fit,
     answer_application_questions,
@@ -31,7 +31,6 @@ from generator import (
     refine_letter,
     summarize_org,
 )
-import cli_auth
 from providers.config import ProviderConfig
 from providers.detect import detect_providers
 from providers.registry import list_models
@@ -161,7 +160,7 @@ def extract_contact_route():
     fields = _regex_contact(text)
     try:
         fields.update({k: v for k, v in extract_contact_fields(text).items() if v})
-    except Exception:  # noqa: BLE001 — no provider / model error: keep regex fields
+    except Exception:  # noqa: BLE001,S110 — no provider / model error: keep regex fields
         pass
     return jsonify({"ok": True, "fields": fields})
 
@@ -181,7 +180,7 @@ def extract_job_route():
         fields = extract_job_fields(text)
         if fields.get("job_description"):
             return jsonify({"ok": True, "fields": fields})
-    except Exception:  # noqa: BLE001 — degrade to raw dump below
+    except Exception:  # noqa: BLE001,S110 — degrade to raw dump below
         pass
     return jsonify({"ok": True, "fallback": True, "fields": {"job_description": text}})
 
@@ -207,7 +206,7 @@ def import_org_route():
         summary = summarize_org(crawled)
         if summary:
             return jsonify({"ok": True, "text": summary, "chars": len(summary)})
-    except Exception:  # noqa: BLE001 — degrade to raw crawled text below
+    except Exception:  # noqa: BLE001,S110 — degrade to raw crawled text below
         pass
     return jsonify(
         {"ok": True, "fallback": True, "text": crawled, "chars": len(crawled)}
@@ -494,7 +493,10 @@ def cli_status_route():
 
 @app.route("/providers/cli-login", methods=["POST"])
 def cli_login_route():
-    """Open the CLI's browser login in a terminal (self-host only). Falls back to a manual command."""
+    """Open the CLI's browser login in a terminal (self-host only).
+
+    Falls back to a manual command.
+    """
     data = request.get_json(silent=True) or {}
     name = (data.get("name") or "").strip()
     if name not in cli_auth.BINARY:
@@ -550,9 +552,8 @@ if __name__ == "__main__":
     print("=" * 60)
     _selected = ProviderConfig().load().selected() or "claude_cli"
     print(f"\nGenerating via provider: {_selected} (change it in the web UI)")
-    print(
-        f"Open http://{'localhost' if host in ('127.0.0.1', '0.0.0.0') else host}:{port} in your browser"
-    )
+    display_host = "localhost" if host in ("127.0.0.1", "0.0.0.0") else host
+    print(f"Open http://{display_host}:{port} in your browser")
     if host == "0.0.0.0":
         print(
             "Reachable on your LAN — open http://<this-machine-ip>:%d on your phone"
@@ -572,7 +573,10 @@ if __name__ == "__main__":
     if _missing:
         print()
         print(f"  ⚠  File upload (.pdf/.docx) is DISABLED — missing: {', '.join(_missing)}")
-        print(f"     Install into THIS Python:  {sys.executable} -m pip install {' '.join(_missing)}")
+        print(
+            f"     Install into THIS Python:  {sys.executable} -m pip install "
+            f"{' '.join(_missing)}"
+        )
         print("     (You can still paste text directly.)")
     print()
 

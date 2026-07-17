@@ -3,19 +3,15 @@
 import sys
 from pathlib import Path
 
-import pytest
-
 APP_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(APP_DIR))
 
-import docx_writer  # noqa: E402
 from docx_writer import (  # noqa: E402
     _paragraphs_from_lines,
     _split_letter_parts,
     build_cover_letter_docx,
     extract_cover_letter_section,
 )
-
 
 # ---------------------------------------------------------------------------
 # extract_cover_letter_section
@@ -173,8 +169,9 @@ class TestBuildCoverLetterDocx:
     def test_contact_name_in_output(self):
         result = build_cover_letter_docx(self.LETTER, contact=self.CONTACT)
         # Parse the docx to inspect text content
-        from docx import Document
         import io
+
+        from docx import Document
 
         doc = Document(io.BytesIO(result))
         full_text = "\n".join(p.text for p in doc.paragraphs)
@@ -182,8 +179,9 @@ class TestBuildCoverLetterDocx:
 
     def test_email_in_contact_line(self):
         result = build_cover_letter_docx(self.LETTER, contact=self.CONTACT)
-        from docx import Document
         import io
+
+        from docx import Document
 
         doc = Document(io.BytesIO(result))
         full_text = "\n".join(p.text for p in doc.paragraphs)
@@ -195,8 +193,9 @@ class TestBuildCoverLetterDocx:
         result = build_cover_letter_docx(
             self.LETTER, contact=self.CONTACT, today=date(2026, 6, 15)
         )
-        from docx import Document
         import io
+
+        from docx import Document
 
         doc = Document(io.BytesIO(result))
         full_text = "\n".join(p.text for p in doc.paragraphs)
@@ -204,8 +203,9 @@ class TestBuildCoverLetterDocx:
 
     def test_salutation_and_body_in_output(self):
         result = build_cover_letter_docx(self.LETTER, contact=self.CONTACT)
-        from docx import Document
         import io
+
+        from docx import Document
 
         doc = Document(io.BytesIO(result))
         full_text = "\n".join(p.text for p in doc.paragraphs)
@@ -215,8 +215,9 @@ class TestBuildCoverLetterDocx:
     def test_closing_sincerely_not_duplicated(self):
         """build_cover_letter_docx adds its own Sincerely; the letter's should be stripped."""
         result = build_cover_letter_docx(self.LETTER, contact=self.CONTACT)
-        from docx import Document
         import io
+
+        from docx import Document
 
         doc = Document(io.BytesIO(result))
         full_text = "\n".join(p.text for p in doc.paragraphs)
