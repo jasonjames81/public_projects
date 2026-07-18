@@ -24,7 +24,7 @@ from pathlib import Path
 # (key, display label, where to paste it) — drives the tabs, injects, and md headers.
 PLATFORMS = [
     ("claude", "Claude", "your project's **Project Instructions**"),
-    ("chatgpt", "ChatGPT", "your project's **Project instructions**"),
+    ("chatgpt", "ChatGPT", "your project's **Project Instructions**"),
     ("gemini", "Gemini", "the notebook's **⋮ menu → Notebook settings → Instructions**"),
 ]
 

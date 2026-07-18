@@ -140,7 +140,8 @@ python app.py         # http://localhost:5000
 ```
 
 Keys are read from the `platformdirs` config dir (`0600`) or the `ANTHROPIC_API_KEY` /
-`OPENAI_API_KEY` / `GOOGLE_API_KEY` env vars.
+`OPENAI_API_KEY` / `GOOGLE_API_KEY` env vars. Each key maps to its provider slot
+(`ANTHROPIC_API_KEY` → Anthropic, `OPENAI_API_KEY` → OpenAI, `GOOGLE_API_KEY` → Google).
 
 | Env var | Default | Purpose |
 |---|---|---|
@@ -148,6 +149,10 @@ Keys are read from the `platformdirs` config dir (`0600`) or the `ANTHROPIC_API_
 | `JALLM_PORT` | `5000` | port |
 | `JALLM_DEBUG` | off | `1` enables Flask debug — **never** on an exposed host (RCE risk) |
 | `JALLM_NO_BROWSER` | off | `1` to stop auto-opening the browser on launch |
+| `JALLM_NO_UPDATE` | off | `1` to skip the self-update check / stay offline |
+| `CLAUDE_MODEL` | `sonnet` | model for the Claude CLI provider |
+| `CLAUDE_TIMEOUT_SECONDS` | `300` | per-subprocess timeout for CLI providers |
+| `WERKZEUG_RUN_MAIN` | (internal) | set by Flask's debug reloader; not user-set |
 
 > **Self-host, one user per instance.** The API key and provider choice live on the server, and
 > imports read local files / fetch URLs on the host — so a shared public instance would let
