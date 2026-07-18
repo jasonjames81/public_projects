@@ -53,6 +53,9 @@ ANTI_PATTERNS = [
     "testament to",
     "streamline",
     "cutting-edge",
+    # 2026 audit reconciliation (sync with project-instructions-core.md blacklist)
+    "elevate",
+    "empower",
 ]
 
 _MIN_BACKGROUND_CHARS = 40
