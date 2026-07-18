@@ -24,10 +24,11 @@ from generator import (
     extract_contact_fields,
     extract_job_fields,
     generate_clarifying_questions,
-    generate_coaching,
     generate_cover_letter,
     generate_interview_followup,
+    generate_interview_prep,
     generate_questions,
+    generate_resume_tuning,
     refine_letter,
     summarize_org,
 )
@@ -60,6 +61,7 @@ def _regex_contact(text: str) -> dict:
 
 
 app = Flask(__name__)
+
 
 def _profile_from(data: dict) -> dict:
     """Pull the applicant profile out of a request body, defaulting to empty."""
@@ -138,9 +140,7 @@ def upload_source_route():
         text = load_upload(f.filename, f.read())
         text = (text or "").strip()
         if not text:
-            return jsonify(
-                {"ok": False, "error": "no readable text found in that file"}
-            )
+            return jsonify({"ok": False, "error": "no readable text found in that file"})
     except SourceError as e:
         return jsonify({"ok": False, "error": str(e)})
     except Exception as e:  # noqa: BLE001 — surface any unexpected failure to the UI
@@ -208,9 +208,7 @@ def import_org_route():
             return jsonify({"ok": True, "text": summary, "chars": len(summary)})
     except Exception:  # noqa: BLE001,S110 — degrade to raw crawled text below
         pass
-    return jsonify(
-        {"ok": True, "fallback": True, "text": crawled, "chars": len(crawled)}
-    )
+    return jsonify({"ok": True, "fallback": True, "text": crawled, "chars": len(crawled)})
 
 
 @app.route("/analyze-fit", methods=["POST"])
@@ -220,9 +218,7 @@ def analyze_fit_route():
     if not job_title or not org_name or not job_description:
         return _missing_job()
     return jsonify(
-        analyze_fit(
-            _profile_from(data), job_title, org_name, job_description, org_about
-        )
+        analyze_fit(_profile_from(data), job_title, org_name, job_description, org_about)
     )
 
 
@@ -320,15 +316,19 @@ def generate():
     )
 
 
-@app.route("/coaching", methods=["POST"])
-def coaching():
+def _coaching_route(generate_fn):
+    """Shared body for the résumé-tuning and interview-prep endpoints.
+
+    Split into two calls (not one combined coaching pass) because interview
+    prep typically happens weeks after the application is submitted.
+    """
     data = request.json or {}
     job_title, org_name, job_description, org_about = _job_fields(data)
     experience_answers = data.get("experience_answers", [])
     if not job_title or not org_name or not job_description:
         return _missing_job()
     return jsonify(
-        generate_coaching(
+        generate_fn(
             _profile_from(data),
             job_title=job_title,
             org_name=org_name,
@@ -337,6 +337,16 @@ def coaching():
             experience_answers=experience_answers or None,
         )
     )
+
+
+@app.route("/resume-tuning", methods=["POST"])
+def resume_tuning():
+    return _coaching_route(generate_resume_tuning)
+
+
+@app.route("/interview-prep", methods=["POST"])
+def interview_prep():
+    return _coaching_route(generate_interview_prep)
 
 
 @app.route("/interview-practice", methods=["POST"])
@@ -398,13 +408,9 @@ def refine():
     job_title = data.get("job_title", "").strip()
     org_name = data.get("org_name", "").strip()
     if not current_letter or not instruction:
-        return jsonify(
-            {"success": False, "error": "Need both current_letter and instruction"}
-        ), 400
+        return jsonify({"success": False, "error": "Need both current_letter and instruction"}), 400
     return jsonify(
-        refine_letter(
-            current_letter, instruction, _profile_from(data), job_title, org_name
-        )
+        refine_letter(current_letter, instruction, _profile_from(data), job_title, org_name)
     )
 
 
@@ -419,9 +425,7 @@ def download_docx():
 
     contact = profile_mod.contact_from_profile(_profile_from(data))
     letter_text = extract_cover_letter_section(content)
-    docx_bytes = build_cover_letter_docx(
-        letter_text, contact=contact, today=date.today()
-    )
+    docx_bytes = build_cover_letter_docx(letter_text, contact=contact, today=date.today())
 
     safe_org = org_name.replace(" ", "_").replace("/", "_") or "Application"
     safe_role = job_title.replace(" ", "_").replace("/", "_") or "CoverLetter"
@@ -446,9 +450,7 @@ def test_api():
                 "message": f"selected provider '{selected}' is not available",
             }
         )
-    return jsonify(
-        {"configured": True, "message": f"{info.display_name} ready — {info.detail}"}
-    )
+    return jsonify({"configured": True, "message": f"{info.display_name} ready — {info.detail}"})
 
 
 @app.route("/providers")
@@ -500,9 +502,7 @@ def cli_login_route():
     data = request.get_json(silent=True) or {}
     name = (data.get("name") or "").strip()
     if name not in cli_auth.BINARY:
-        return jsonify(
-            {"launched": False, "error": f"not a CLI provider: {name!r}"}
-        ), 400
+        return jsonify({"launched": False, "error": f"not a CLI provider: {name!r}"}), 400
     return jsonify(cli_auth.launch_login(name))
 
 
@@ -555,10 +555,7 @@ if __name__ == "__main__":
     display_host = "localhost" if host in ("127.0.0.1", "0.0.0.0") else host
     print(f"Open http://{display_host}:{port} in your browser")
     if host == "0.0.0.0":
-        print(
-            "Reachable on your LAN — open http://<this-machine-ip>:%d on your phone"
-            % port
-        )
+        print("Reachable on your LAN — open http://<this-machine-ip>:%d on your phone" % port)
 
     # Surface a missing file-parsing dependency loudly here, in the terminal the
     # user keeps open — otherwise it only shows as an error after they try to
@@ -574,8 +571,7 @@ if __name__ == "__main__":
         print()
         print(f"  ⚠  File upload (.pdf/.docx) is DISABLED — missing: {', '.join(_missing)}")
         print(
-            f"     Install into THIS Python:  {sys.executable} -m pip install "
-            f"{' '.join(_missing)}"
+            f"     Install into THIS Python:  {sys.executable} -m pip install {' '.join(_missing)}"
         )
         print("     (You can still paste text directly.)")
     print()

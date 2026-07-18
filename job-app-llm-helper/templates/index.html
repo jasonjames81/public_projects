@@ -267,10 +267,11 @@ Describe a time you led under pressure. (200 words)"></textarea>
   <!-- GENERATE -->
   <div class="card">
     <h2>Generate</h2>
-    <p class="hint">The cover letter folds in any employer-question answers you drafted above. Résumé &amp; interview tips are a separate, no-commitment pass.</p>
+    <p class="hint">The cover letter folds in any employer-question answers you drafted above. Résumé tuning and interview prep are separate, no-commitment passes — run interview prep whenever the interview is actually coming up.</p>
     <div class="btns">
       <button type="button" id="generateBtn">Generate cover letter</button>
-      <button type="button" id="coachingBtn" class="ghost">Generate résumé &amp; interview tips</button>
+      <button type="button" id="resumeTipsBtn" class="ghost">Résumé tuning tips</button>
+      <button type="button" id="interviewPrepBtn" class="ghost">Interview prep</button>
     </div>
 
   </div>
@@ -290,9 +291,20 @@ Describe a time you led under pressure. (200 words)"></textarea>
     <div id="resultErr" class="err"></div>
   </div>
 
-  <!-- RESULT: RÉSUMÉ & INTERVIEW TIPS -->
+  <!-- RESULT: RÉSUMÉ TUNING -->
+  <div class="card" id="resumeTipsCard" style="display:none">
+    <h2>Résumé tuning</h2>
+    <div id="resumeTipsOut" class="out"></div>
+    <div class="btns">
+      <button type="button" id="copyResumeTipsBtn" class="ghost">Copy</button>
+      <button type="button" id="downloadResumeTipsDocxBtn" class="ghost">Download .docx</button>
+    </div>
+    <div id="resumeTipsErr" class="err"></div>
+  </div>
+
+  <!-- RESULT: INTERVIEW PREP -->
   <div class="card" id="coachingCard" style="display:none">
-    <h2>Résumé &amp; interview tips</h2>
+    <h2>Interview prep</h2>
     <div id="coachingOut" class="out"></div>
     <div class="btns">
       <button type="button" id="copyCoachingBtn" class="ghost">Copy</button>
@@ -1020,24 +1032,33 @@ $("generateBtn").addEventListener("click", async () => {
   }
   showResult(res.content);
 });
-$("coachingBtn").addEventListener("click", async () => {
-  if (!requireInputs()) return;
-  busy($("coachingBtn"), true, "Working…");
-  const res = await postJSON("/coaching", {
-    ...jobContext(), profile: currentProfile(),
-    experience_answers: collectExperienceAnswers(),
+// Résumé tuning and interview prep are separate endpoints/cards — prep usually
+// happens weeks after the application goes out.
+function wireCoachingButton(btnId, endpoint, cardId, outId, errId, idleLabel) {
+  $(btnId).addEventListener("click", async () => {
+    if (!requireInputs()) return;
+    busy($(btnId), true, "Working…");
+    const res = await postJSON(endpoint, {
+      ...jobContext(), profile: currentProfile(),
+      experience_answers: collectExperienceAnswers(),
+    });
+    busy($(btnId), false, idleLabel);
+    $(cardId).style.display = "";
+    if (!res.success) {
+      $(outId).textContent = "";
+      $(errId).textContent = res.error || "Generation failed.";
+      return;
+    }
+    $(errId).textContent = "";
+    $(outId).textContent = res.content || "";
+    $(cardId).scrollIntoView({ behavior: "smooth", block: "start" });
   });
-  busy($("coachingBtn"), false, "Generate résumé & interview tips");
-  $("coachingCard").style.display = "";
-  if (!res.success) {
-    $("coachingOut").textContent = "";
-    $("coachingErr").textContent = res.error || "Generation failed.";
-    return;
-  }
-  $("coachingErr").textContent = "";
-  $("coachingOut").textContent = res.content || "";
-  $("coachingCard").scrollIntoView({ behavior: "smooth", block: "start" });
-});
+}
+wireCoachingButton("resumeTipsBtn", "/resume-tuning", "resumeTipsCard", "resumeTipsOut", "resumeTipsErr", "Résumé tuning tips");
+wireCoachingButton("interviewPrepBtn", "/interview-prep", "coachingCard", "coachingOut", "coachingErr", "Interview prep");
+$("copyResumeTipsBtn").addEventListener("click", () =>
+  navigator.clipboard && navigator.clipboard.writeText($("resumeTipsOut").textContent)
+);
 $("copyCoachingBtn").addEventListener("click", () =>
   navigator.clipboard && navigator.clipboard.writeText($("coachingOut").textContent)
 );
@@ -1128,27 +1149,31 @@ $("copyFingerprintBtn").addEventListener("click", () =>
 $("writingSamples").addEventListener("input", scheduleVoiceFingerprint);
 
 // ---- coaching docx download (D3) -------------------------------------------
-$("downloadCoachingDocxBtn").addEventListener("click", async () => {
-  const content = $("coachingOut").textContent;
-  if (!content) return;
-  busy($("downloadCoachingDocxBtn"), true, "Building…");
-  try {
-    const res = await fetch("/download-coaching-docx", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        content, job_title: $("jobTitle").value.trim(), org_name: $("orgName").value.trim(),
-      }),
-    });
-    if (!res.ok) { $("coachingErr").textContent = "Download failed."; return; }
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = "CoachingTips.docx";
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
-  } catch { $("coachingErr").textContent = "Download failed."; }
-  busy($("downloadCoachingDocxBtn"), false, "Download .docx");
-});
+function wireCoachingDocx(btnId, outId, errId, filename) {
+  $(btnId).addEventListener("click", async () => {
+    const content = $(outId).textContent;
+    if (!content) return;
+    busy($(btnId), true, "Building…");
+    try {
+      const res = await fetch("/download-coaching-docx", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content, job_title: $("jobTitle").value.trim(), org_name: $("orgName").value.trim(),
+        }),
+      });
+      if (!res.ok) { $(errId).textContent = "Download failed."; return; }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    } catch { $(errId).textContent = "Download failed."; }
+    busy($(btnId), false, "Download .docx");
+  });
+}
+wireCoachingDocx("downloadResumeTipsDocxBtn", "resumeTipsOut", "resumeTipsErr", "ResumeTuning.docx");
+wireCoachingDocx("downloadCoachingDocxBtn", "coachingOut", "coachingErr", "InterviewPrep.docx");
 
 // ---- interview practice (D1) -----------------------------------------------
 let interviewHistory = [];

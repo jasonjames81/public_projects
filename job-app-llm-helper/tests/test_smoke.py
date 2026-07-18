@@ -90,12 +90,9 @@ def test_generate_route_threads_profile(client, monkeypatch):
     assert "Jason" not in captured["prompt"]
 
 
-def test_coaching_route_threads_profile(client, monkeypatch):
+def test_resume_tuning_route_threads_profile(client, monkeypatch):
     captured = {}
-    canned = (
-        "## 1. RÉSUMÉ TAILORING SUGGESTIONS\n- emphasize algorithm design\n\n"
-        "## 2. INTERVIEW PREPARATION\nMatch score: 90\n- Talking point: Note G.\n"
-    )
+    canned = "## RÉSUMÉ TAILORING SUGGESTIONS\n- emphasize algorithm design\n"
 
     def fake(prompt, **kw):
         captured["prompt"] = prompt
@@ -103,7 +100,32 @@ def test_coaching_route_threads_profile(client, monkeypatch):
 
     monkeypatch.setattr(generator, "call_llm", fake)
     res = client.post(
-        "/coaching",
+        "/resume-tuning",
+        json={
+            **JOB,
+            "profile": SAMPLE_PROFILE,
+            "experience_answers": [{"question": "Hardest?", "answer": "Note G."}],
+        },
+    )
+    body = res.get_json()
+    assert body["success"], body
+    assert "RÉSUMÉ TAILORING" in body["content"]
+    assert "Ada Lovelace" in captured["prompt"] and "Jason" not in captured["prompt"]
+    assert "Note G." in captured["prompt"]  # useful details answer threaded
+    assert "INTERVIEW PREPARATION" not in captured["prompt"]  # split, not combined
+
+
+def test_interview_prep_route_threads_profile(client, monkeypatch):
+    captured = {}
+    canned = "## INTERVIEW PREPARATION\nMatch score: 90\n- Talking point: Note G.\n"
+
+    def fake(prompt, **kw):
+        captured["prompt"] = prompt
+        return canned
+
+    monkeypatch.setattr(generator, "call_llm", fake)
+    res = client.post(
+        "/interview-prep",
         json={
             **JOB,
             "profile": SAMPLE_PROFILE,
@@ -114,7 +136,8 @@ def test_coaching_route_threads_profile(client, monkeypatch):
     assert body["success"], body
     assert "INTERVIEW PREPARATION" in body["content"]
     assert "Ada Lovelace" in captured["prompt"] and "Jason" not in captured["prompt"]
-    assert "Note G." in captured["prompt"]  # useful details answer threaded
+    assert "Note G." in captured["prompt"]
+    assert "TAILORING SUGGESTIONS" not in captured["prompt"]  # split, not combined
 
 
 def test_generate_cover_letter_excludes_coaching_sections(client, monkeypatch):
@@ -122,9 +145,7 @@ def test_generate_cover_letter_excludes_coaching_sections(client, monkeypatch):
     monkeypatch.setattr(
         generator,
         "call_llm",
-        lambda prompt, **kw: (
-            "Dear Hiring Manager,\n\nBody about machines.\n\nSincerely,\nAda"
-        ),
+        lambda prompt, **kw: "Dear Hiring Manager,\n\nBody about machines.\n\nSincerely,\nAda",
     )
     res = client.post("/generate", json={**JOB, "profile": SAMPLE_PROFILE})
     body = res.get_json()
@@ -186,9 +207,7 @@ def test_get_questions_route(client, monkeypatch):
 
     def fake(prompt, **kw):
         captured["prompt"] = prompt
-        return json.dumps(
-            ["What algorithm did you design?", "Describe a hard delivery."]
-        )
+        return json.dumps(["What algorithm did you design?", "Describe a hard delivery."])
 
     monkeypatch.setattr(generator, "call_llm", fake)
     res = client.post("/get-questions", json={**JOB, "profile": SAMPLE_PROFILE})
@@ -216,9 +235,7 @@ def test_answer_application_questions_route(client, monkeypatch):
 
     def fake(prompt, **kw):
         captured["prompt"] = prompt
-        return json.dumps(
-            [{"question": "Why us?", "answer": "Because of the machines."}]
-        )
+        return json.dumps([{"question": "Why us?", "answer": "Because of the machines."}])
 
     monkeypatch.setattr(generator, "call_llm", fake)
     res = client.post(
@@ -226,16 +243,12 @@ def test_answer_application_questions_route(client, monkeypatch):
         json={
             **JOB,
             "profile": SAMPLE_PROFILE,
-            "questions": [
-                {"question": "Why us?", "limit": {"value": 150, "unit": "words"}}
-            ],
+            "questions": [{"question": "Why us?", "limit": {"value": 150, "unit": "words"}}],
             "clarifying_answers": [{"question": "Which year?", "answer": "1843"}],
         },
     )
     body = res.get_json()
-    assert (
-        body["success"] and body["answers"][0]["answer"] == "Because of the machines."
-    )
+    assert body["success"] and body["answers"][0]["answer"] == "Because of the machines."
     # length cap + clarifying context reached the prompt
     assert "150 words" in captured["prompt"] and "1843" in captured["prompt"]
 
@@ -253,9 +266,7 @@ def test_generate_includes_useful_details_and_application_answers(client, monkey
         json={
             **JOB,
             "profile": SAMPLE_PROFILE,
-            "experience_answers": [
-                {"question": "Hardest project?", "answer": "Note G."}
-            ],
+            "experience_answers": [{"question": "Hardest project?", "answer": "Note G."}],
             "application_answers": [{"question": "Why us?", "answer": "The machines."}],
         },
     )
@@ -310,9 +321,7 @@ def test_load_source_route_and_errors(client, tmp_path):
     ok = client.post("/load-source", json={"ref": str(f)}).get_json()
     assert ok["ok"] and ok["chars"] > 0 and "Analytical Engine" in ok["text"]
 
-    missing = client.post(
-        "/load-source", json={"ref": str(tmp_path / "nope.txt")}
-    ).get_json()
+    missing = client.post("/load-source", json={"ref": str(tmp_path / "nope.txt")}).get_json()
     assert missing["ok"] is False and "not found" in missing["error"]
 
     empty = client.post("/load-source", json={"ref": ""})

@@ -466,7 +466,7 @@ About the Organization:
 {prior_qa_section}
 === YOUR TASK ===
 
-Analyze this job description and generate 4-5 specific, targeted questions that will help the
+Analyze this job description and generate 3-5 specific, targeted questions that will help the
 applicant surface useful details for the cover letter.
 
 GUIDELINES:
@@ -614,21 +614,27 @@ cover letter — no section headers, no preamble, no explanation, no markdown fe
 - Close with the applicant's standard pattern (see voice fingerprint)"""
 
 
-def _build_coaching_prompt(
+def _coaching_context(
     profile: dict,
     job_title: str,
     org_name: str,
     job_description: str,
     org_about: str,
     experience_answers,
-) -> str:
+) -> tuple[str, str]:
+    """(applicant name, shared materials block) for the two coaching prompts.
+
+    Résumé tuning and interview prep are separate calls because applicants
+    typically tune the résumé at application time and prep for interviews
+    weeks later.
+    """
     name = profile_mod.applicant_name(profile)
     profile_block = profile_mod.build_profile_summary(profile)
     stories_block = profile_mod.build_stories_block(profile)
 
     experience_section = _format_experience_section(name, experience_answers)
 
-    return f"""You are coaching {name} on how to position themselves for a specific job. Base every
+    materials = f"""You are coaching {name} on how to position themselves for a specific job. Base every
 suggestion only on the materials below — never invent experience the applicant doesn't show.
 
 {profile_block}
@@ -644,13 +650,28 @@ Job Description:
 {job_description}
 
 About the Organization:
-{org_about if org_about else "Not provided"}
+{org_about if org_about else "Not provided"}"""
+    return name, materials
+
+
+def _build_resume_tuning_prompt(
+    profile: dict,
+    job_title: str,
+    org_name: str,
+    job_description: str,
+    org_about: str,
+    experience_answers,
+) -> str:
+    _, materials = _coaching_context(
+        profile, job_title, org_name, job_description, org_about, experience_answers
+    )
+    return f"""{materials}
 
 === YOUR TASK ===
 
-Produce two sections, in this order, with the headers exactly as shown:
+Produce one section, with the header exactly as shown:
 
-## 1. RÉSUMÉ TAILORING SUGGESTIONS
+## RÉSUMÉ TAILORING SUGGESTIONS
 
 Based on the job requirements, suggest:
 - Which points from the background to emphasize or move to the top
@@ -658,7 +679,28 @@ Based on the job requirements, suggest:
 - Skills to highlight
 - Any gaps to address in the application
 
-## 2. INTERVIEW PREPARATION
+Format your response with clear headers using ## for main sections and --- for subsections.
+Do not invent numbers, organizations, dates, or stories beyond what the materials show."""
+
+
+def _build_interview_prep_prompt(
+    profile: dict,
+    job_title: str,
+    org_name: str,
+    job_description: str,
+    org_about: str,
+    experience_answers,
+) -> str:
+    _, materials = _coaching_context(
+        profile, job_title, org_name, job_description, org_about, experience_answers
+    )
+    return f"""{materials}
+
+=== YOUR TASK ===
+
+Produce one section, with the header exactly as shown:
+
+## INTERVIEW PREPARATION
 
 Provide:
 - Match score (0-100) with a one-sentence explanation
@@ -741,16 +783,10 @@ def generate_cover_letter(
         }
 
 
-def generate_coaching(
-    profile: dict,
-    job_title,
-    org_name,
-    job_description,
-    org_about="",
-    experience_answers=None,
+def _generate_coaching_section(
+    prompt_builder, profile, job_title, org_name, job_description, org_about, experience_answers
 ) -> dict:
-    """Generate résumé-tailoring suggestions + interview prep via the selected provider."""
-    prompt = _build_coaching_prompt(
+    prompt = prompt_builder(
         profile,
         job_title,
         org_name,
@@ -770,6 +806,46 @@ def generate_coaching(
         }
     except Exception as e:
         return {"success": False, "error": str(e)}
+
+
+def generate_resume_tuning(
+    profile: dict,
+    job_title,
+    org_name,
+    job_description,
+    org_about="",
+    experience_answers=None,
+) -> dict:
+    """Generate résumé-tailoring suggestions via the selected provider."""
+    return _generate_coaching_section(
+        _build_resume_tuning_prompt,
+        profile,
+        job_title,
+        org_name,
+        job_description,
+        org_about,
+        experience_answers,
+    )
+
+
+def generate_interview_prep(
+    profile: dict,
+    job_title,
+    org_name,
+    job_description,
+    org_about="",
+    experience_answers=None,
+) -> dict:
+    """Generate interview-prep coaching via the selected provider."""
+    return _generate_coaching_section(
+        _build_interview_prep_prompt,
+        profile,
+        job_title,
+        org_name,
+        job_description,
+        org_about,
+        experience_answers,
+    )
 
 
 def generate_interview_followup(
